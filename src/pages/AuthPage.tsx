@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,11 +13,26 @@ import { Shield, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 const AuthPage: React.FC = () => {
-  const { connectWallet, setUserType, address } = useAuth();
+  const { connectWallet, setUserType, address, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedUserType, setSelectedUserType] = useState<"student" | "institute">("student");
   const [otp, setOtp] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [otpSent, setOtpSent] = useState<boolean>(false);
+
+  // Determine which tab to show based on URL
+  const isRegisterPage = location.pathname === "/register";
+  const defaultTab = isRegisterPage ? "register" : "login";
+
+  // Handle automatic redirection if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectPath = location.state?.from || 
+        (selectedUserType === "student" ? "/student/dashboard" : "/institute/dashboard");
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, navigate, selectedUserType, location.state]);
 
   // Handle wallet connection
   const handleConnectWallet = async () => {
@@ -29,8 +44,18 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  // Handle OTP verification and registration
+  // Handle OTP verification and registration/login
   const handleAuthenticate = async () => {
+    if (!address) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+    
+    if (!otp) {
+      toast.error("Please enter the verification code");
+      return;
+    }
+    
     setIsProcessing(true);
     
     try {
@@ -41,7 +66,8 @@ const AuthPage: React.FC = () => {
       // Set user type in auth context
       setUserType(selectedUserType);
       
-      toast.success(`Successfully authenticated as ${selectedUserType}`);
+      const actionType = isRegisterPage ? "registered" : "logged in";
+      toast.success(`Successfully ${actionType} as ${selectedUserType}`);
       
       // Redirect to appropriate dashboard
       navigate(selectedUserType === "student" ? "/student/dashboard" : "/institute/dashboard");
@@ -59,6 +85,7 @@ const AuthPage: React.FC = () => {
       return;
     }
     
+    setOtpSent(true);
     toast.info("OTP sent to your registered email/phone");
     // In a real app, this would trigger an API call to send an OTP
   };
@@ -84,10 +111,10 @@ const AuthPage: React.FC = () => {
           Welcome to E-Certify
         </h2>
 
-        <Tabs defaultValue="register" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="register">Register</TabsTrigger>
-            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register" onClick={() => navigate("/register", { replace: true })}>Register</TabsTrigger>
+            <TabsTrigger value="login" onClick={() => navigate("/login", { replace: true })}>Login</TabsTrigger>
           </TabsList>
 
           {/* Registration Tab */}
@@ -151,8 +178,13 @@ const AuthPage: React.FC = () => {
                             onChange={(e) => setOtp(e.target.value)}
                           />
                         </div>
-                        <Button variant="outline" size="sm" onClick={sendOtp}>
-                          Send OTP
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={sendOtp}
+                          disabled={otpSent}
+                        >
+                          {otpSent ? "OTP Sent" : "Send OTP"}
                         </Button>
                       </div>
 
@@ -232,8 +264,13 @@ const AuthPage: React.FC = () => {
                             onChange={(e) => setOtp(e.target.value)}
                           />
                         </div>
-                        <Button variant="outline" size="sm" onClick={sendOtp}>
-                          Send OTP
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={sendOtp}
+                          disabled={otpSent}
+                        >
+                          {otpSent ? "OTP Sent" : "Send OTP"}
                         </Button>
                       </div>
 

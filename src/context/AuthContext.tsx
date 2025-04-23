@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setAddress(connectedAddress);
       setSigner(connectedSigner);
-
+      
       // Check if user already has a saved type
       const savedUserType = localStorage.getItem("e-certify-user-type");
       if (savedUserType && (savedUserType === "student" || savedUserType === "institute")) {
@@ -113,9 +113,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast.success("Connected to wallet successfully!");
       }
 
+      return connectedAddress;
     } catch (error) {
       console.error("Error connecting to wallet:", error);
       toast.error("Failed to connect wallet. Please try again.");
+      throw error;
     }
   };
 
@@ -132,6 +134,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUserType(type);
     localStorage.setItem("e-certify-user-type", type);
     setIsAuthenticated(true);
+    toast.success(`Successfully set user type as ${type}`);
   };
 
   return (
