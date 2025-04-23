@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  const connectWallet = async () => {
+  const connectWallet = async (): Promise<void> => {
     if (!window.ethereum) {
       toast.error("MetaMask is not installed. Please install MetaMask to continue.", {
         duration: 5000,
@@ -112,8 +112,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated(true);
         toast.success("Connected to wallet successfully!");
       }
-
-      return connectedAddress;
+      
+      // Return void instead of the address
     } catch (error) {
       console.error("Error connecting to wallet:", error);
       toast.error("Failed to connect wallet. Please try again.");
