@@ -13,6 +13,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Public Pages
 import HomePage from "@/pages/HomePage";
+import AboutPage from "@/pages/AboutPage";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => {
                 {/* Public Routes */}
                 <Route element={<RootLayout />}>
                   <Route path="/" element={<HomePage />} />
+                  <Route path="/about" element={<AboutPage />} />
                   <Route path="/login" element={<AuthPage />} />
                   <Route path="/register" element={<AuthPage />} />
                 </Route>
